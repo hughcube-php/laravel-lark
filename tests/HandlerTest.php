@@ -1,11 +1,11 @@
 <?php
 
 /**
- * This file is part of the hughcube/laravel-lark.
+ * 本文件属于 hughcube/laravel-lark。
  *
  * (c) hugh.li <hugh.li@foxmail.com>
  *
- * This source file is subject to the MIT license that is bundled.
+ * 完整版权与许可信息见随附的 MIT 协议。
  */
 
 namespace HughCube\Laravel\Lark\Tests;
@@ -15,7 +15,7 @@ use HughCube\Laravel\Lark\Log\Handler;
 class HandlerTest extends TestCase
 {
     /**
-     * An anonymous subclass that exposes the protected members.
+     * 一个暴露 protected 成员的匿名子类。
      */
     private function handler(): Handler
     {
@@ -67,7 +67,7 @@ class HandlerTest extends TestCase
 
     public function testLongChineseIsTruncatedWithoutMojibake(): void
     {
-        // ~150 KB of Chinese, every char is 3 bytes in UTF-8.
+        // ~150 KB 的中文，每个字在 UTF-8 下占 3 字节。
         $message = str_repeat('飞书机器人告警', 8000);
 
         $result = $this->handler()->callTruncate($message);
@@ -79,7 +79,7 @@ class HandlerTest extends TestCase
         $body = substr($result, 0, -strlen(Handler::TRUNCATED_SUFFIX));
         $this->assertTrue(mb_check_encoding($body, 'UTF-8'));
         $this->assertStringNotContainsString("\u{FFFD}", $body);
-        // mb_strcut keeps whole characters: byte length is a multiple of 3.
+        // mb_strcut 保留完整字符：字节长度是 3 的倍数。
         $this->assertSame(0, strlen($body) % 3);
     }
 
@@ -101,7 +101,7 @@ class HandlerTest extends TestCase
         $this->assertSame('interactive', $payload['msg_type']);
         $this->assertSame('red', $payload['card']['header']['template']);
         $this->assertSame('[ERROR] testing', $payload['card']['header']['title']['content']);
-        // plain_text -> log content is never parsed as markdown.
+        // plain_text —— 日志内容绝不会被当成 markdown 解析。
         $this->assertSame('plain_text', $payload['card']['elements'][0]['text']['tag']);
         $this->assertSame(
             'something failed 出错了',

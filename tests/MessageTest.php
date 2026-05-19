@@ -1,11 +1,11 @@
 <?php
 
 /**
- * This file is part of the hughcube/laravel-lark.
+ * 本文件属于 hughcube/laravel-lark。
  *
  * (c) hugh.li <hugh.li@foxmail.com>
  *
- * This source file is subject to the MIT license that is bundled.
+ * 完整版权与许可信息见随附的 MIT 协议。
  */
 
 namespace HughCube\Laravel\Lark\Tests;
@@ -92,7 +92,7 @@ class MessageTest extends TestCase
         $expected = base64_encode(hash_hmac('sha256', '', $timestamp . "\n" . $secret, true));
 
         $this->assertSame($expected, $client->sign($timestamp, $secret));
-        // base64 of a 32-byte sha256 digest is always 44 chars.
+        // 32 字节 sha256 摘要的 base64 结果固定为 44 个字符。
         $this->assertSame(44, strlen($client->sign($timestamp, $secret)));
     }
 

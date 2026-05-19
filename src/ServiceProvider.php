@@ -1,11 +1,11 @@
 <?php
 
 /**
- * This file is part of the hughcube/laravel-lark.
+ * 本文件属于 hughcube/laravel-lark。
  *
  * (c) hugh.li <hugh.li@foxmail.com>
  *
- * This source file is subject to the MIT license that is bundled.
+ * 完整版权与许可信息见随附的 MIT 协议。
  */
 
 namespace HughCube\Laravel\Lark;
@@ -23,7 +23,7 @@ class ServiceProvider extends IlluminateServiceProvider implements DeferrablePro
     }
 
     /**
-     * Boot the provider.
+     * 启动服务提供者。
      */
     public function boot(): void
     {
@@ -38,7 +38,7 @@ class ServiceProvider extends IlluminateServiceProvider implements DeferrablePro
     }
 
     /**
-     * Register the provider.
+     * 注册服务提供者。
      */
     public function register(): void
     {
@@ -50,7 +50,7 @@ class ServiceProvider extends IlluminateServiceProvider implements DeferrablePro
     }
 
     /**
-     * Get the services provided by the provider.
+     * 返回本提供者提供的服务（用于延迟加载）。
      *
      * @return array<int, string>
      */

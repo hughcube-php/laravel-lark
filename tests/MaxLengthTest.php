@@ -1,11 +1,11 @@
 <?php
 
 /**
- * This file is part of the hughcube/laravel-lark.
+ * 本文件属于 hughcube/laravel-lark。
  *
  * (c) hugh.li <hugh.li@foxmail.com>
  *
- * This source file is subject to the MIT license that is bundled.
+ * 完整版权与许可信息见随附的 MIT 协议。
  */
 
 namespace HughCube\Laravel\Lark\Tests;
@@ -14,19 +14,18 @@ use HughCube\Laravel\Lark\Lark;
 use HughCube\Laravel\Lark\Robot\Messages\Text;
 
 /**
- * Empirically probe the maximum text content the Feishu custom robot accepts.
+ * 实测飞书自定义机器人能接受的最大文本内容。
  *
- * The Feishu documentation states the message content limit is around 30 KB.
- * This test binary-searches the real boundary against the live webhook and
- * prints it, while staying inside the bot frequency limit (<= 5 req/s,
- * <= 100 req/min) by sleeping between probes.
+ * 飞书文档称内容上限约 30 KB；本用例对真实 webhook 做二分查找定位
+ * 真实边界并打印出来，同时通过探测间隔休眠把请求控制在频控之内
+ * （<= 5 次/秒，<= 100 次/分）。
  *
  * @group live
  */
 class MaxLengthTest extends TestCase
 {
     /**
-     * Pause between probes to respect the custom bot frequency control.
+     * 每次探测之间的停顿，用于遵守自定义机器人的频控。
      */
     private const PROBE_INTERVAL_US = 900_000;
 
@@ -41,9 +40,8 @@ class MaxLengthTest extends TestCase
             return 0 === (int) $code;
         } catch (\Throwable $e) {
             /*
-             * Distinguish "content too long" from transient frequency
-             * control. On a rate-limit signal, back off and retry once so
-             * the boundary search stays accurate.
+             * 区分“内容过长”与“瞬时频控”。命中频控信号时退避并重试
+             * 一次，保证边界查找的准确性。
              */
             if ($this->looksLikeRateLimit($e->getMessage())) {
                 sleep(5);
@@ -79,17 +77,17 @@ class MaxLengthTest extends TestCase
     {
         $this->skipWithoutWebhook();
 
-        // A tiny message must always succeed; otherwise config is broken.
+        // 极小的消息必须永远成功，否则就是配置坏了。
         $this->assertTrue(
             $this->sendTextOfSize(16),
             'A 16-byte text message should always be accepted.'
         );
         usleep(self::PROBE_INTERVAL_US);
 
-        $low = 16;            // known good
-        $high = 200_000;      // assumed too large
+        $low = 16;            // 已知可通过
+        $high = 200_000;      // 假定过大
 
-        // Make sure the upper bound is actually rejected; widen if needed.
+        // 确认上界确实会被拒绝；必要时继续扩大。
         $guard = 0;
         while ($this->sendTextOfSize($high) && $guard < 4) {
             $low = $high;
@@ -98,7 +96,7 @@ class MaxLengthTest extends TestCase
             usleep(self::PROBE_INTERVAL_US);
         }
 
-        // Binary search the boundary to ~256 byte precision.
+        // 二分查找边界，精度到 ~256 字节。
         while ($high - $low > 256) {
             $mid = intdiv($low + $high, 2);
 
@@ -118,7 +116,7 @@ class MaxLengthTest extends TestCase
             $high
         ));
 
-        // Sanity: the real limit is well above 1 KB and below 1 MB.
+        // 合理性检查：真实上限远大于 1 KB 且小于 1 MB。
         $this->assertGreaterThan(1024, $low);
         $this->assertLessThan(1_048_576, $low);
     }

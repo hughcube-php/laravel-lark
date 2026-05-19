@@ -1,11 +1,11 @@
 <?php
 
 /**
- * This file is part of the hughcube/laravel-lark.
+ * 本文件属于 hughcube/laravel-lark。
  *
  * (c) hugh.li <hugh.li@foxmail.com>
  *
- * This source file is subject to the MIT license that is bundled.
+ * 完整版权与许可信息见随附的 MIT 协议。
  */
 
 namespace HughCube\Laravel\Lark;
@@ -24,6 +24,8 @@ class Manager
     protected $container;
 
     /**
+     * 已创建的机器人实例缓存。
+     *
      * @var array<string, Robot>
      */
     protected array $robots = [];
@@ -50,6 +52,8 @@ class Manager
     }
 
     /**
+     * 读取本包命名空间下的配置项。
+     *
      * @throws BindingResolutionException
      */
     protected function getConfig(string|null $key = null, mixed $default = null): mixed
@@ -64,6 +68,8 @@ class Manager
     }
 
     /**
+     * 以 defaults 为基底、指定配置覆盖其上，合并后返回。
+     *
      * @param array<mixed>|null $default
      *
      * @throws BindingResolutionException
@@ -79,7 +85,7 @@ class Manager
     }
 
     /**
-     * Get a robot instance by name.
+     * 按名称获取一个机器人实例。
      *
      * @throws BindingResolutionException
      */

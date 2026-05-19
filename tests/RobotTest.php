@@ -1,11 +1,11 @@
 <?php
 
 /**
- * This file is part of the hughcube/laravel-lark.
+ * 本文件属于 hughcube/laravel-lark。
  *
  * (c) hugh.li <hugh.li@foxmail.com>
  *
- * This source file is subject to the MIT license that is bundled.
+ * 完整版权与许可信息见随附的 MIT 协议。
  */
 
 namespace HughCube\Laravel\Lark\Tests;
@@ -18,6 +18,8 @@ use HughCube\Laravel\Lark\Robot\Messages\Post;
 use HughCube\Laravel\Lark\Robot\Messages\Text;
 
 /**
+ * 对真实 webhook 发送各类型消息的实时用例。
+ *
  * @group live
  */
 class RobotTest extends TestCase

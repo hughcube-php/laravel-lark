@@ -1,11 +1,11 @@
 <?php
 
 /**
- * This file is part of the hughcube/laravel-lark.
+ * 本文件属于 hughcube/laravel-lark。
  *
  * (c) hugh.li <hugh.li@foxmail.com>
  *
- * This source file is subject to the MIT license that is bundled.
+ * 完整版权与许可信息见随附的 MIT 协议。
  */
 
 namespace HughCube\Laravel\Lark\Robot;
@@ -20,14 +20,14 @@ use InvalidArgumentException;
 use RuntimeException;
 
 /**
- * Lark (Feishu) custom robot client.
+ * 飞书（Lark）自定义机器人客户端。
  *
  * @see https://open.feishu.cn/document/client-docs/bot-v3/add-custom-bot
  */
 class Client
 {
     /**
-     * Default endpoint prefix used when only a hook token is configured.
+     * 仅配置了 hook token 时使用的默认 webhook 前缀。
      */
     public const HOOK_PREFIX = 'https://open.feishu.cn/open-apis/bot/v2/hook/';
 
@@ -47,6 +47,8 @@ class Client
     }
 
     /**
+     * 默认配置。
+     *
      * @return array<mixed>
      */
     public function defaultConfig(): array
@@ -85,7 +87,7 @@ class Client
     }
 
     /**
-     * Resolve the final webhook url.
+     * 解析最终的 webhook 地址。
      */
     public function getWebhook(): string
     {
@@ -103,9 +105,9 @@ class Client
     }
 
     /**
-     * Generate the Feishu signature.
+     * 生成飞书签名。
      *
-     * key  = "{timestamp}\n{secret}", data = "" (empty), algo = sha256, then base64.
+     * 算法：key = "{timestamp}\n{secret}"，data = ""（空串），sha256 后再 base64。
      *
      * @see https://open.feishu.cn/document/client-docs/bot-v3/add-custom-bot
      */
@@ -115,7 +117,7 @@ class Client
     }
 
     /**
-     * Send a message through the custom robot webhook.
+     * 通过自定义机器人 webhook 发送一条消息。
      *
      * @throws GuzzleException
      *
@@ -152,8 +154,8 @@ class Client
         }
 
         /*
-         * The hook returns "code" on the v2 endpoint and historically also
-         * "StatusCode". Treat either being zero as success.
+         * v2 接口返回 "code"，历史上也可能返回 "StatusCode"，
+         * 其中任意一个为 0 即视为成功。
          */
         $code = $results['code'] ?? $results['StatusCode'] ?? null;
         if (null === $code) {
@@ -172,7 +174,7 @@ class Client
     }
 
     /**
-     * Convenience helper to send a plain text message.
+     * 便捷方法：直接发送一条纯文本消息。
      *
      * @throws GuzzleException
      *

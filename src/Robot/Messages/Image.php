@@ -1,17 +1,17 @@
 <?php
 
 /**
- * This file is part of the hughcube/laravel-lark.
+ * 本文件属于 hughcube/laravel-lark。
  *
  * (c) hugh.li <hugh.li@foxmail.com>
  *
- * This source file is subject to the MIT license that is bundled.
+ * 完整版权与许可信息见随附的 MIT 协议。
  */
 
 namespace HughCube\Laravel\Lark\Robot\Messages;
 
 /**
- * Image message. The image_key must be uploaded via the Lark open api first.
+ * 图片消息。image_key 需先通过飞书开放接口上传图片获得。
  *
  * @see https://open.feishu.cn/document/server-docs/im-v1/image/create
  */

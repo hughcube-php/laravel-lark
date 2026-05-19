@@ -1,17 +1,17 @@
 <?php
 
 /**
- * This file is part of the hughcube/laravel-lark.
+ * 本文件属于 hughcube/laravel-lark。
  *
  * (c) hugh.li <hugh.li@foxmail.com>
  *
- * This source file is subject to the MIT license that is bundled.
+ * 完整版权与许可信息见随附的 MIT 协议。
  */
 
 namespace HughCube\Laravel\Lark\Robot\Messages;
 
 /**
- * Interactive message card.
+ * 交互式消息卡片。
  *
  * @see https://open.feishu.cn/document/common-capabilities/message-card/message-cards-content
  */
@@ -37,7 +37,7 @@ final class Interactive extends Message
     }
 
     /**
-     * Build a card from a header title and a list of elements.
+     * 用标题和元素列表快速构建一张卡片。
      *
      * @param array<int, array<string, mixed>> $elements
      */
@@ -54,7 +54,7 @@ final class Interactive extends Message
     }
 
     /**
-     * Append an element to the card.
+     * 向卡片追加一个元素。
      *
      * @param array<string, mixed> $element
      */
@@ -66,7 +66,7 @@ final class Interactive extends Message
     }
 
     /**
-     * Append a lark_md content block (content is parsed as markdown).
+     * 追加一个 lark_md 内容块（内容会按 markdown 解析）。
      */
     public function markdown(string $content): static
     {
@@ -77,8 +77,8 @@ final class Interactive extends Message
     }
 
     /**
-     * Append a plain_text content block (content is rendered literally,
-     * never interpreted as markdown — safe for arbitrary log output).
+     * 追加一个 plain_text 内容块（内容按字面渲染，
+     * 绝不按 markdown 解析——适合承载任意日志输出）。
      */
     public function text(string $content): static
     {

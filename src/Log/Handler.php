@@ -1,11 +1,11 @@
 <?php
 
 /**
- * This file is part of the hughcube/laravel-lark.
+ * 本文件属于 hughcube/laravel-lark。
  *
  * (c) hugh.li <hugh.li@foxmail.com>
  *
- * This source file is subject to the MIT license that is bundled.
+ * 完整版权与许可信息见随附的 MIT 协议。
  */
 
 namespace HughCube\Laravel\Lark\Log;
@@ -20,25 +20,23 @@ use Monolog\LogRecord;
 class Handler extends AbstractProcessingHandler
 {
     /**
-     * Safe content ceiling.
+     * 安全的内容上限。
      *
-     * Empirically the Feishu custom-bot content is accepted up to ~150 KiB
-     * for BOTH text and interactive cards (measured boundary: text 153323 ok
-     * / 153518 rejected, card 152968 ok / 153241 rejected, i.e. ~153600 =
-     * 150 * 1024). Past it the hook returns error 19036 "The message exceeds
-     * the size limit of 30KB" — the cited "30KB" is loose; the real enforced
-     * limit is ~150 KiB and it is the same for cards and text.
+     * 实测飞书自定义机器人的内容上限对【文本】和【交互卡片】是一致的，
+     * 约 ~150 KiB（实测边界：文本 153323 通过 / 153518 拒绝，卡片
+     * 152968 通过 / 153241 拒绝，即 ~153600 = 150 * 1024）。超限后
+     * 接口返回 error 19036 "The message exceeds the size limit of 30KB"
+     * ——文案里的 "30KB" 是虚的，真实限制约 ~150 KiB，且卡片与文本相同。
      *
-     * Feishu chat auto-folds long content (a "show more" expander), so a long
-     * card still reads well — there is no presentation reason to downgrade to
-     * text. We cap at 120 KB: a wide margin below the measured boundary (room
-     * for the card/JSON envelope, huge fault tolerance) while still delivering
-     * very long stack traces in full.
+     * 飞书会话会自动折叠超长内容（"展开更多"），所以长卡片依然好读，
+     * 没有理由因为长而降级成文本。这里上限取 120 KB：在实测边界之下
+     * 留足余量（容纳卡片/JSON 外壳，容错充足），同时仍能完整投递很长
+     * 的堆栈信息。
      */
     public const MAX_BYTES = 120000;
 
     /**
-     * Appended (in place of the trimmed tail) when a record is truncated.
+     * 内容被截断时，替换掉尾部并追加的标记。
      */
     public const TRUNCATED_SUFFIX = '…[truncated]';
 
@@ -47,11 +45,10 @@ class Handler extends AbstractProcessingHandler
     protected bool $enabled;
 
     /**
-     * Render records as a colored interactive card (by log level).
+     * 是否将日志渲染为按级别上色的交互卡片。
      *
-     * On by default. The (UTF-8 safe, size-capped) record is sent as a card;
-     * only if Feishu actually rejects the card does it fall back to a plain
-     * Text message. Set to false to always send Text.
+     * 默认开启。记录经 UTF-8 安全截断、限长后作为卡片发送；仅当飞书
+     * 真的拒绝了该卡片时，才回退为纯文本消息。设为 false 则始终发文本。
      */
     protected bool $card;
 
@@ -81,7 +78,7 @@ class Handler extends AbstractProcessingHandler
             return;
         }
 
-        /* Prevent loop errors: never let the log channel throw. */
+        /* 防止日志回环：绝不让日志通道抛出异常。 */
         try {
             $formatted = (string) (is_array($record) ? $record['formatted'] : $record->formatted);
             $robot = Lark::robot($this->robot);
@@ -92,19 +89,19 @@ class Handler extends AbstractProcessingHandler
 
                     return;
                 } catch (\Throwable $cardException) {
-                    // Card rejected (e.g. 19036): fall back to plain text.
+                    // 卡片被拒（例如 19036）：回退为纯文本。
                 }
             }
 
             $robot->send($this->textMessage($formatted));
         } catch (\Throwable $exception) {
-            // swallow on purpose
+            // 故意吞掉异常
         }
     }
 
     /**
-     * Build a level-colored interactive card. The body is a plain_text block,
-     * so arbitrary log output is never re-parsed as markdown.
+     * 构建按级别上色的交互卡片。正文用 plain_text 块，
+     * 因此任意日志输出都不会被当作 markdown 再次解析。
      *
      * @param array<mixed>|LogRecord $record
      */
@@ -128,8 +125,8 @@ class Handler extends AbstractProcessingHandler
     }
 
     /**
-     * Extract [level value, level name, channel] from a Monolog 2 array
-     * record or a Monolog 3 LogRecord without hard-coupling to either.
+     * 从 Monolog 2 的数组记录或 Monolog 3 的 LogRecord 中提取
+     * [级别值, 级别名, 通道]，且不与任一版本强耦合。
      *
      * @param array<mixed>|LogRecord $record
      *
@@ -140,7 +137,7 @@ class Handler extends AbstractProcessingHandler
         $level = is_array($record) ? ($record['level'] ?? 0) : $record->level;
 
         if (is_object($level)) {
-            // Monolog\Level enum (Monolog 3).
+            // Monolog\Level 枚举（Monolog 3）。
             $levelValue = (int) ($level->value ?? 0);
             $levelName = method_exists($level, 'getName')
                 ? (string) $level->getName()
@@ -158,7 +155,7 @@ class Handler extends AbstractProcessingHandler
     }
 
     /**
-     * Map a Monolog level value to a Feishu card header template color.
+     * 将 Monolog 级别值映射为飞书卡片标题栏的颜色模板。
      */
     protected function color(int $levelValue): string
     {
@@ -173,14 +170,14 @@ class Handler extends AbstractProcessingHandler
     }
 
     /**
-     * Trim a record to a safe size without ever producing mojibake.
+     * 把记录裁剪到安全大小，且绝不产生乱码。
      *
-     * Steps:
-     *  1. sanitise to valid UTF-8 (a stack trace can carry raw bytes), so the
-     *     cut and the later json_encode never garble or fail;
-     *  2. cut with mb_strcut + explicit UTF-8 — it stops on a character
-     *     boundary, so a multibyte (e.g. Chinese) glyph is never split;
-     *  3. append a marker so the reader knows the tail was dropped.
+     * 步骤：
+     *  1. 先净化为合法 UTF-8（堆栈里可能夹带原始字节），保证后续
+     *     裁剪与 json_encode 既不乱码也不失败；
+     *  2. 用 mb_strcut 并显式指定 UTF-8 裁剪——它在字符边界处停止，
+     *     所以多字节字符（如中文）绝不会被从中间切断；
+     *  3. 追加标记，让阅读者知道尾部已被丢弃。
      */
     protected function truncate(string $message, ?int $maxBytes = null): string
     {

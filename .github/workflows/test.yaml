@@ -2,8 +2,7 @@ name: Test
 
 on: [ push, pull_request ]
 
-# The live Feishu webhook has a per-bot frequency limit; never let two runs
-# hit it at the same time.
+# 实时飞书 webhook 有按机器人计的频控；绝不让两次运行同时打它。
 concurrency:
   group: lark-live-webhook
   cancel-in-progress: false
@@ -52,8 +51,8 @@ jobs:
         if: ${{ 'true' == env.has_deps }}
         run: composer info
 
-      # Live webhook tests run on exactly one cell so the custom-bot
-      # frequency limit is never exceeded. This cell needs the secrets.
+      # 实时 webhook 用例只在唯一一个单元格上跑，确保不会超出自定义
+      # 机器人的频控。该单元格需要 secrets。
       - name: Run PHPUnit (with live Feishu webhook)
         if: ${{ 'true' == env.has_deps && matrix.php == '8.3' && matrix.laravel == '12' && runner.os == 'Linux' }}
         env:

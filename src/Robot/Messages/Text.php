@@ -1,22 +1,22 @@
 <?php
 
 /**
- * This file is part of the hughcube/laravel-lark.
+ * 本文件属于 hughcube/laravel-lark。
  *
  * (c) hugh.li <hugh.li@foxmail.com>
  *
- * This source file is subject to the MIT license that is bundled.
+ * 完整版权与许可信息见随附的 MIT 协议。
  */
 
 namespace HughCube\Laravel\Lark\Robot\Messages;
 
 /**
- * Text message.
+ * 文本消息。
  *
- * Mentions are inline tags inside the text content, e.g.
- *   <at user_id="all"></at>            mention everyone
- *   <at user_id="ou_xxx">name</at>     mention a user by open_id
- *   <at email="x@x.com"></at>          mention a user by email
+ * @ 提及是文本内容里的内联标签，例如：
+ *   <at user_id="all"></at>            提及所有人
+ *   <at user_id="ou_xxx">name</at>     按 open_id 提及某人
+ *   <at email="x@x.com"></at>          按邮箱提及某人
  *
  * @see https://open.feishu.cn/document/client-docs/bot-v3/add-custom-bot
  */
@@ -38,7 +38,7 @@ final class Text extends Message
     }
 
     /**
-     * Append a chunk of text.
+     * 追加一段文本。
      */
     public function text(string $text): static
     {
@@ -48,7 +48,7 @@ final class Text extends Message
     }
 
     /**
-     * Append a chunk of text followed by a newline.
+     * 追加一段文本并换行。
      */
     public function line(string $text = ''): static
     {
@@ -56,7 +56,7 @@ final class Text extends Message
     }
 
     /**
-     * Mention everyone in the chat.
+     * 提及群里所有人。
      */
     public function atAll(): static
     {
@@ -64,7 +64,7 @@ final class Text extends Message
     }
 
     /**
-     * Mention a user by open_id / union_id / user_id.
+     * 按 open_id / union_id / user_id 提及某人。
      */
     public function at(string $userId, string $name = ''): static
     {
@@ -72,7 +72,7 @@ final class Text extends Message
     }
 
     /**
-     * Mention a user by email.
+     * 按邮箱提及某人。
      */
     public function atEmail(string $email, string $name = ''): static
     {

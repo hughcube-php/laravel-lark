@@ -1,17 +1,17 @@
 <?php
 
 /**
- * This file is part of the hughcube/laravel-lark.
+ * 本文件属于 hughcube/laravel-lark。
  *
  * (c) hugh.li <hugh.li@foxmail.com>
  *
- * This source file is subject to the MIT license that is bundled.
+ * 完整版权与许可信息见随附的 MIT 协议。
  */
 
 return [
     /*
-     * Config shared by every robot. Merged as the base, each robot's own
-     * config overrides the matching keys here.
+     * 所有机器人共享的配置。作为基底合并，每个机器人各自的配置会
+     * 覆盖这里的同名键。
      */
     'defaults' => [
         'http' => [
@@ -25,8 +25,8 @@ return [
             'enabled' => env('LARK_ROBOT_ENABLED', true),
 
             /*
-             * Either the full webhook url, or just the hook token. When only
-             * the token is given the url is built automatically.
+             * 可以填完整的 webhook 地址，也可以只填 hook token；
+             * 只填 token 时会自动拼出完整地址。
              *
              * webhook: https://open.feishu.cn/open-apis/bot/v2/hook/xxxxxxxx
              * token:   xxxxxxxx
@@ -35,8 +35,8 @@ return [
             'token'   => env('LARK_ROBOT_TOKEN', ''),
 
             /*
-             * The signing secret configured on the custom bot security setting.
-             * Leave empty when signature verification is not enabled.
+             * 自定义机器人安全设置里配置的签名密钥。
+             * 未开启签名校验时留空即可。
              */
             'secret' => env('LARK_ROBOT_SECRET', ''),
         ],

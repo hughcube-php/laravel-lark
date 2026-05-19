@@ -1,19 +1,19 @@
 <?php
 
 /**
- * This file is part of the hughcube/laravel-lark.
+ * 本文件属于 hughcube/laravel-lark。
  *
  * (c) hugh.li <hugh.li@foxmail.com>
  *
- * This source file is subject to the MIT license that is bundled.
+ * 完整版权与许可信息见随附的 MIT 协议。
  */
 
 namespace HughCube\Laravel\Lark\Robot\Messages;
 
 /**
- * Rich text (post) message.
+ * 富文本（post）消息。
  *
- * Content is a list of paragraphs, each paragraph is a list of nodes:
+ * content 是段落列表，每个段落是节点列表：
  *   ['tag' => 'text', 'text' => '...']
  *   ['tag' => 'a', 'text' => '...', 'href' => 'https://...']
  *   ['tag' => 'at', 'user_id' => 'ou_xxx']
@@ -57,7 +57,7 @@ final class Post extends Message
     }
 
     /**
-     * Add one paragraph (a list of nodes).
+     * 追加一个段落（节点列表）。
      *
      * @param array<int, array<string, mixed>> $nodes
      */
@@ -69,7 +69,7 @@ final class Post extends Message
     }
 
     /**
-     * Add a paragraph that contains a single text node.
+     * 追加一个只含单个文本节点的段落。
      */
     public function line(string $text): static
     {
@@ -77,7 +77,7 @@ final class Post extends Message
     }
 
     /**
-     * Add a paragraph that contains a single link node.
+     * 追加一个只含单个链接节点的段落。
      */
     public function link(string $text, string $href): static
     {
