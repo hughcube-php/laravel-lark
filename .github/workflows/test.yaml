@@ -11,10 +11,16 @@ jobs:
   run-linux:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       max-parallel: 15
       matrix: &matrix
         php: [ '8.0', '8.1', '8.2', '8.3', '8.4', '8.5' ]
         laravel: [ '10', '11', '12', '13' ]
+        # PHP 8.5 + Laravel 10（旧版 PHPUnit 10.5）会让 PHP 运行时段错误，
+        # 这是该组合的环境级崩溃，与本包无关；Laravel 10 也不支持 PHP 8.5。
+        exclude:
+          - php: '8.5'
+            laravel: '10'
     name: PHP ${{ matrix.php }} Laravel ${{ matrix.laravel }} Test on ubuntu-latest
     steps: &common_steps
       - name: Checkout
@@ -67,6 +73,7 @@ jobs:
   run-macos:
     runs-on: macOS-latest
     strategy:
+      fail-fast: false
       max-parallel: 15
       matrix: *matrix
     name: PHP ${{ matrix.php }} Laravel ${{ matrix.laravel }} Test on macOS-latest
@@ -78,6 +85,7 @@ jobs:
       run:
         shell: bash
     strategy:
+      fail-fast: false
       max-parallel: 15
       matrix: *matrix
     name: PHP ${{ matrix.php }} Laravel ${{ matrix.laravel }} Test on windows-latest
