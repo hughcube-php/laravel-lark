@@ -1,6 +1,7 @@
 {
-    "name": "hughcube/laravel-dingtalk",
-    "description": "",
+    "name": "hughcube/laravel-lark",
+    "description": "Lark (Feishu) custom robot/webhook notifications for Laravel & Lumen.",
+    "keywords": ["laravel", "lumen", "lark", "feishu", "robot", "webhook", "notification"],
     "license": "MIT",
     "authors": [
         {
@@ -11,6 +12,7 @@
     "require": {
         "php": "8.*",
         "ext-mbstring": "*",
+        "ext-json": "*",
         "guzzlehttp/guzzle": "*",
         "monolog/monolog": "*",
         "hughcube/laravel-service-support": "^1.0"
@@ -24,20 +26,29 @@
     },
     "autoload": {
         "psr-4": {
-            "HughCube\\Laravel\\DingTalk\\": "src"
+            "HughCube\\Laravel\\Lark\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "HughCube\\Laravel\\DingTalk\\Tests\\": "tests"
+            "HughCube\\Laravel\\Lark\\Tests\\": "tests"
         }
     },
-    "extra": {},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "HughCube\\Laravel\\Lark\\ServiceProvider"
+            ],
+            "aliases": {
+                "Lark": "HughCube\\Laravel\\Lark\\Lark"
+            }
+        }
+    },
     "scripts": {
-        "test": "phpunit --verbose --coverage-clover=coverage.clover",
-        "phpstan": "phpstan analyse -vvv",
-        "check-style": "phpcs -p --standard=PSR2 src/ -v",
-        "fix-style": "phpcbf -p --standard=PSR2 src/ -v"
+        "test": "phpunit",
+        "phpstan": "phpstan analyse --no-progress",
+        "check-style": "phpcs",
+        "fix-style": "phpcbf"
     },
     "minimum-stability": "dev",
     "prefer-stable": true

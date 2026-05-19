@@ -1,0 +1,31 @@
+name: Lint
+
+on: [ push, pull_request ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@master
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+          coverage: none
+
+      - name: System Setting
+        run: |
+          php -v
+          composer -V
+          php -m
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run check-style
+        run: composer run-script check-style
+
+      - name: Run phpstan
+        run: composer run-script phpstan

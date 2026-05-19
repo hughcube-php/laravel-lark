@@ -1,0 +1,85 @@
+name: Test
+
+on: [ push, pull_request ]
+
+# The live Feishu webhook has a per-bot frequency limit; never let two runs
+# hit it at the same time.
+concurrency:
+  group: lark-live-webhook
+  cancel-in-progress: false
+
+jobs:
+  run-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 15
+      matrix: &matrix
+        php: [ '8.0', '8.1', '8.2', '8.3', '8.4', '8.5' ]
+        laravel: [ '10', '11', '12', '13' ]
+    name: PHP ${{ matrix.php }} Laravel ${{ matrix.laravel }} Test on ubuntu-latest
+    steps: &common_steps
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@master
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, json, curl
+          tools: composer:v2
+          ini-values: post_max_size=256M, short_open_tag=On, opcache.enable_cli=1
+          coverage: none
+
+      - name: System Setting
+        run: |
+          php -v
+          composer -V
+          php -m
+
+      - name: Validate composer.json
+        run: composer validate --no-check-publish
+
+      - name: Install dependencies
+        run: |
+          echo "has_deps=false" >> "$GITHUB_ENV"
+          composer config --no-plugins audit.block-insecure false
+          composer require "laravel/framework:^${{ matrix.laravel }}" --dev --no-update --prefer-stable
+          composer update --prefer-stable --prefer-dist --no-interaction --no-progress
+          echo "has_deps=true" >> "$GITHUB_ENV"
+        continue-on-error: true
+
+      - name: Composer Info
+        if: ${{ 'true' == env.has_deps }}
+        run: composer info
+
+      # Live webhook tests run on exactly one cell so the custom-bot
+      # frequency limit is never exceeded. This cell needs the secrets.
+      - name: Run PHPUnit (with live Feishu webhook)
+        if: ${{ 'true' == env.has_deps && matrix.php == '8.3' && matrix.laravel == '12' && runner.os == 'Linux' }}
+        env:
+          LARK_ROBOT_WEBHOOK: ${{ secrets.LARK_WEBHOOK }}
+          LARK_ROBOT_SECRET: ${{ secrets.LARK_SECRET }}
+        run: composer run-script test -- -c phpunit.xml.dist --testdox
+
+      - name: Run PHPUnit (unit only)
+        if: ${{ 'true' == env.has_deps && !(matrix.php == '8.3' && matrix.laravel == '12' && runner.os == 'Linux') }}
+        run: composer run-script test -- -c phpunit.xml.dist --testdox --exclude-group live
+
+  run-macos:
+    runs-on: macOS-latest
+    strategy:
+      max-parallel: 15
+      matrix: *matrix
+    name: PHP ${{ matrix.php }} Laravel ${{ matrix.laravel }} Test on macOS-latest
+    steps: *common_steps
+
+  run-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      max-parallel: 15
+      matrix: *matrix
+    name: PHP ${{ matrix.php }} Laravel ${{ matrix.laravel }} Test on windows-latest
+    steps: *common_steps

@@ -1,39 +1,61 @@
 <?php
+
 /**
- * Created by PhpStorm.
- * User: hugh.li
- * Date: 2021/4/18
- * Time: 10:32 下午.
+ * This file is part of the hughcube/laravel-lark.
+ *
+ * (c) hugh.li <hugh.li@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled.
  */
 
-namespace HughCube\Laravel\DingTalk;
+namespace HughCube\Laravel\Lark;
 
+use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use Laravel\Lumen\Application as LumenApplication;
 
-class ServiceProvider extends IlluminateServiceProvider
+class ServiceProvider extends IlluminateServiceProvider implements DeferrableProvider
 {
+    protected function configPath(): string
+    {
+        return (string) realpath(dirname(__DIR__) . '/config/config.php');
+    }
+
     /**
      * Boot the provider.
      */
-    public function boot()
+    public function boot(): void
     {
         if ($this->app instanceof LaravelApplication && $this->app->runningInConsole()) {
-            $source = realpath(dirname(__DIR__).'/config/config.php');
-            $this->publishes([$source => config_path(sprintf('%s.php', DingTalk::getFacadeAccessor()))]);
+            $this->publishes(
+                [$this->configPath() => config_path(sprintf('%s.php', Lark::getFacadeAccessor()))],
+                'lark-config'
+            );
         } elseif ($this->app instanceof LumenApplication) {
-            $this->app->configure(DingTalk::getFacadeAccessor());
+            $this->app->configure(Lark::getFacadeAccessor());
         }
     }
 
     /**
      * Register the provider.
      */
-    public function register()
+    public function register(): void
     {
-        $this->app->singleton(DingTalk::getFacadeAccessor(), function ($app) {
-            return new Manager();
+        $this->mergeConfigFrom($this->configPath(), Lark::getFacadeAccessor());
+
+        $this->app->singleton(Lark::getFacadeAccessor(), function ($app) {
+            return new Manager($app);
         });
+    }
+
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return array<int, string>
+     */
+    public function provides(): array
+    {
+        return [Lark::getFacadeAccessor()];
     }
 }

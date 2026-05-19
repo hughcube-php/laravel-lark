@@ -1,22 +1,37 @@
 <?php
+
 /**
- * Created by PhpStorm.
- * User: hugh.li
- * Date: 2021/11/5
- * Time: 17:46.
+ * This file is part of the hughcube/laravel-lark.
+ *
+ * (c) hugh.li <hugh.li@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled.
  */
 
-namespace HughCube\Laravel\DingTalk\Robot\Messages;
+namespace HughCube\Laravel\Lark\Robot\Messages;
 
 abstract class Message
 {
+    /**
+     * @var array<mixed>
+     */
     protected array $message = [];
 
     /**
-     * @return array
+     * The raw message payload sent as the request body.
+     *
+     * @return array<mixed>
      */
     public function getMessage(): array
     {
         return $this->message;
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    public function toArray(): array
+    {
+        return $this->getMessage();
     }
 }

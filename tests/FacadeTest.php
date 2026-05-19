@@ -1,26 +1,33 @@
 <?php
+
 /**
- * Created by PhpStorm.
- * User: hugh.li
- * Date: 2021/4/20
- * Time: 11:45 下午.
+ * This file is part of the hughcube/laravel-lark.
+ *
+ * (c) hugh.li <hugh.li@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled.
  */
 
-namespace HughCube\Laravel\DingTalk\Tests;
+namespace HughCube\Laravel\Lark\Tests;
 
-use HughCube\Laravel\DingTalk\DingTalk;
-use HughCube\Laravel\DingTalk\Manager;
-use HughCube\Laravel\DingTalk\Robot\Client as Robot;
+use HughCube\Laravel\Lark\Lark;
+use HughCube\Laravel\Lark\Manager;
+use HughCube\Laravel\Lark\Robot\Client as Robot;
 
 class FacadeTest extends TestCase
 {
-    public function testIsFacade()
+    public function testIsFacade(): void
     {
-        $this->assertInstanceOf(Manager::class, DingTalk::getFacadeRoot());
+        $this->assertInstanceOf(Manager::class, Lark::getFacadeRoot());
     }
 
-    public function testRobot()
+    public function testRobot(): void
     {
-        $this->assertInstanceOf(Robot::class, DingTalk::robot());
+        $this->assertInstanceOf(Robot::class, Lark::robot());
+    }
+
+    public function testRobotIsCached(): void
+    {
+        $this->assertSame(Lark::robot(), Lark::robot('default'));
     }
 }
