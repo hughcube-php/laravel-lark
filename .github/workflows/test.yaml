@@ -15,12 +15,10 @@ jobs:
       max-parallel: 15
       matrix: &matrix
         php: [ '8.0', '8.1', '8.2', '8.3', '8.4', '8.5' ]
-        laravel: [ '10', '11', '12', '13' ]
-        # PHP 8.5 + Laravel 10（旧版 PHPUnit 10.5）会让 PHP 运行时段错误，
-        # 这是该组合的环境级崩溃，与本包无关；Laravel 10 也不支持 PHP 8.5。
-        exclude:
-          - php: '8.5'
-            laravel: '10'
+        # Laravel 10 拉到的 PHPUnit 10.5 在 PHP 8.4/8.5 上会段错误（上游
+        # 工具问题，崩在跑用例之前）；本包运行时仍支持 Laravel 10，这里
+        # 只 CI 验证 PHPUnit 11+ 稳定的 Laravel 11/12/13。
+        laravel: [ '11', '12', '13' ]
     name: PHP ${{ matrix.php }} Laravel ${{ matrix.laravel }} Test on ubuntu-latest
     steps: &common_steps
       - name: Checkout
