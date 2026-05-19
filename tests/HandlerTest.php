@@ -15,40 +15,65 @@ use HughCube\Laravel\Lark\Log\Handler;
 class HandlerTest extends TestCase
 {
     /**
-     * An anonymous subclass that exposes the protected truncate().
+     * An anonymous subclass that exposes the protected members.
      */
     private function handler(): Handler
     {
-        return new class ('default', true) extends Handler {
-            public function call(string $message): string
+        return new class ('default', true, 300, true, true) extends Handler {
+            public function callTruncate(string $message): string
             {
                 return $this->truncate($message);
             }
+
+            /**
+             * @param array<mixed> $record
+             */
+            public function callCard(array $record): object
+            {
+                return $this->cardMessage($record, (string) ($record['formatted'] ?? ''));
+            }
+
+            public function callText(string $formatted): object
+            {
+                return $this->textMessage($formatted);
+            }
+
+            public function callColor(int $level): string
+            {
+                return $this->color($level);
+            }
         };
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function record(string $formatted, int $level = 400, string $name = 'ERROR'): array
+    {
+        return [
+            'formatted'  => $formatted,
+            'level'      => $level,
+            'level_name' => $name,
+            'channel'    => 'testing',
+        ];
     }
 
     public function testShortMessageIsUntouched(): void
     {
         $message = '短消息 hello';
 
-        $this->assertSame($message, $this->handler()->call($message));
+        $this->assertSame($message, $this->handler()->callTruncate($message));
     }
 
     public function testLongChineseIsTruncatedWithoutMojibake(): void
     {
-        // ~60 KB of Chinese, every char is 3 bytes in UTF-8.
-        $message = str_repeat('飞书机器人告警', 3000);
+        // ~150 KB of Chinese, every char is 3 bytes in UTF-8.
+        $message = str_repeat('飞书机器人告警', 8000);
 
-        $result = $this->handler()->call($message);
+        $result = $this->handler()->callTruncate($message);
 
-        // Stays within budget.
         $this->assertLessThanOrEqual(Handler::MAX_BYTES, strlen($result));
-
-        // Still valid UTF-8 -> no garbled tail.
         $this->assertTrue(mb_check_encoding($result, 'UTF-8'));
-
-        // Marker present, and the body before it is a clean character cut
-        // (no replacement / question-mark substitution from a split glyph).
         $this->assertStringEndsWith(Handler::TRUNCATED_SUFFIX, $result);
 
         $body = substr($result, 0, -strlen(Handler::TRUNCATED_SUFFIX));
@@ -60,11 +85,60 @@ class HandlerTest extends TestCase
 
     public function testInvalidBytesAreSanitised(): void
     {
-        // A raw invalid byte (as could appear inside a binary stack trace).
         $message = "ok \xB0\xA1 tail";
 
-        $result = $this->handler()->call($message);
+        $result = $this->handler()->callTruncate($message);
 
         $this->assertTrue(mb_check_encoding($result, 'UTF-8'));
+    }
+
+    public function testCardMessageIsLevelColoredPlainText(): void
+    {
+        $payload = $this->handler()
+            ->callCard($this->record('something failed 出错了', 400, 'ERROR'))
+            ->getMessage();
+
+        $this->assertSame('interactive', $payload['msg_type']);
+        $this->assertSame('red', $payload['card']['header']['template']);
+        $this->assertSame('[ERROR] testing', $payload['card']['header']['title']['content']);
+        // plain_text -> log content is never parsed as markdown.
+        $this->assertSame('plain_text', $payload['card']['elements'][0]['text']['tag']);
+        $this->assertSame(
+            'something failed 出错了',
+            $payload['card']['elements'][0]['text']['content']
+        );
+    }
+
+    public function testTextMessageIsAlwaysText(): void
+    {
+        $payload = $this->handler()->callText('boom')->getMessage();
+
+        $this->assertSame('text', $payload['msg_type']);
+        $this->assertSame('boom', $payload['content']['text']);
+    }
+
+    public function testColorMapping(): void
+    {
+        $h = $this->handler();
+
+        $this->assertSame('red', $h->callColor(600));    // EMERGENCY
+        $this->assertSame('red', $h->callColor(400));     // ERROR
+        $this->assertSame('orange', $h->callColor(300));  // WARNING
+        $this->assertSame('yellow', $h->callColor(250));  // NOTICE
+        $this->assertSame('blue', $h->callColor(200));    // INFO
+        $this->assertSame('grey', $h->callColor(100));    // DEBUG
+    }
+
+    public function testLongCardBodyIsTruncatedSafely(): void
+    {
+        $payload = $this->handler()
+            ->callCard($this->record(str_repeat('日志', 100000), 300, 'WARNING'))
+            ->getMessage();
+
+        $content = $payload['card']['elements'][0]['text']['content'];
+
+        $this->assertLessThanOrEqual(Handler::MAX_BYTES, strlen($content));
+        $this->assertTrue(mb_check_encoding($content, 'UTF-8'));
+        $this->assertSame('orange', $payload['card']['header']['template']);
     }
 }

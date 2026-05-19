@@ -126,7 +126,9 @@ Pipe Monolog records to a robot with `HughCube\Laravel\Lark\Log\Handler`:
     'lark' => [
         'driver'  => 'monolog',
         'handler' => HughCube\Laravel\Lark\Log\Handler::class,
-        'with'    => ['robot' => 'default', 'enabled' => true],
+        // 'card' => true (default) sends a level-colored card;
+        // set it to false to always send plain text.
+        'with'    => ['robot' => 'default', 'enabled' => true, 'card' => true],
         'level'   => 'warning',
     ],
 ],
@@ -134,20 +136,27 @@ Pipe Monolog records to a robot with `HughCube\Laravel\Lark\Log\Handler`:
 
 ## Message size limit
 
-The Feishu documentation only implies a ~30 KB content limit, but the custom
-robot actually accepts much larger `text` payloads. This package ships a live
-probe (`tests/MaxLengthTest.php`) that binary-searches the real boundary
-against a webhook. Measured result:
+Feishu's error text cites "30KB", but the custom robot actually accepts much
+larger payloads — and the limit is **the same for `text` and `interactive`
+cards**. `tests/MaxLengthTest.php` binary-searches the real `text` boundary
+against a live webhook; the card boundary was probed the same way. Measured:
 
-| metric | value |
-| --- | --- |
-| last accepted | **153,323 bytes** |
-| first rejected | 153,518 bytes |
-| effective limit | **≈ 150 KiB (153,600 bytes)** |
+| message type | last accepted | first rejected | effective limit |
+| --- | --- | --- | --- |
+| text | **153,323 bytes** | 153,518 bytes | **≈ 150 KiB** |
+| interactive card | **152,968 bytes** | 153,241 bytes | **≈ 150 KiB** |
 
-The bundled `Log\Handler` trims to `20000` bytes — far below the limit so the
-signed JSON envelope can never push a notification over, and so log messages
-stay readable in chat.
+Past the boundary the hook returns `error 19036 — The message exceeds the size
+limit of 30KB` (the cited "30KB" is loose; the enforced ceiling is ~150 KiB,
+≈ 153,600 = 150 × 1024).
+
+The bundled `Log\Handler` sends a **level-colored interactive card by default**
+(`plain_text` body, so log output is never re-parsed as markdown), trimmed
+UTF-8-safely to `120000` bytes — a wide margin below the boundary so the JSON
+envelope can never tip it over, and Chinese is never cut mid-character. Feishu
+auto-folds long content, so a long card still reads well; if Feishu ever
+rejects the card it automatically falls back to a plain `Text` message. Pass
+`['card' => false]` in the channel `with` to always send plain text.
 
 > Custom bots are also frequency limited (≈ 5 req/s, ≈ 100 req/min per bot).
 

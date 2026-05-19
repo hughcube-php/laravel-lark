@@ -66,13 +66,25 @@ final class Interactive extends Message
     }
 
     /**
-     * Append a lark_md / plain_text content block.
+     * Append a lark_md content block (content is parsed as markdown).
      */
     public function markdown(string $content): static
     {
         return $this->element([
             'tag'  => 'div',
             'text' => ['tag' => 'lark_md', 'content' => $content],
+        ]);
+    }
+
+    /**
+     * Append a plain_text content block (content is rendered literally,
+     * never interpreted as markdown — safe for arbitrary log output).
+     */
+    public function text(string $content): static
+    {
+        return $this->element([
+            'tag'  => 'div',
+            'text' => ['tag' => 'plain_text', 'content' => $content],
         ]);
     }
 }
